@@ -164,10 +164,10 @@ class CertificatesProvides(CertificatesInterface):
 class CertificatesRequires(CertificatesInterface):
 
     def request_certificate(self, common_name):
-        self.charm.model.get_relation('certificates')
+        # ca_relation = self.charm.model.get_relation('certificates')
         # logger.info('Relation %s', ca_relation)
-        # event = self.charm.on.certificates_requested.emit()
         # logger.info('Event %s', event)
         # logger.info('Units %s', ca_relation.units)
         # logger.info(dir(event))
         # cert_manager_unit = next(iter(ca_relation.units))
+        self.charm.on.certificates_requested.emit()
