@@ -1,0 +1,112 @@
+unit-cert-manager-0: 15:27:30 ERROR unit.cert-manager/0.juju-log Uncaught exception while in charm code:
+Traceback (most recent call last):
+  File "./src/charm.py", line 113, in <module>
+    main(CertManagerCharm)
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/ops/main.py", line 404, in main
+    framework.reemit()
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/ops/framework.py", line 732, in reemit
+    self._reemit()
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/ops/framework.py", line 767, in _reemit
+    custom_handler(event)
+  File "./src/charm.py", line 44, in _on_install
+    create_from_yaml(k8s_client, crd_file, namespace=self.model.name)
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/kubernetes/utils/create_from_yaml.py", line 69, in create_from_yaml
+    created = create_from_dict(k8s_client, yml_document, verbose,
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/kubernetes/utils/create_from_yaml.py", line 129, in create_from_dict
+    created = create_from_yaml_single_item(
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/kubernetes/utils/create_from_yaml.py", line 171, in create_from_yaml_single_item
+    resp = getattr(k8s_api, "create_{0}".format(kind))(
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/kubernetes/client/api/apiextensions_v1_api.py", line 65, in create_custom_resource_definition
+    return self.create_custom_resource_definition_with_http_info(body, **kwargs)  # noqa: E501
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/kubernetes/client/api/apiextensions_v1_api.py", line 152, in create_custom_resource_definition_with_http_info
+    return self.api_client.call_api(
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/kubernetes/client/api_client.py", line 348, in call_api
+    return self.__call_api(resource_path, method,
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/kubernetes/client/api_client.py", line 180, in __call_api
+    response_data = self.request(
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/kubernetes/client/api_client.py", line 391, in request
+    return self.rest_client.POST(url,
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/kubernetes/client/rest.py", line 274, in POST
+    return self.request("POST", url,
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/kubernetes/client/rest.py", line 230, in request
+    logger.debug("response body: %s", r.data)
+  File "/usr/lib/python3.8/logging/__init__.py", line 1422, in debug
+    self._log(DEBUG, msg, args, **kwargs)
+  File "/usr/lib/python3.8/logging/__init__.py", line 1577, in _log
+    self.handle(record)
+  File "/usr/lib/python3.8/logging/__init__.py", line 1587, in handle
+    self.callHandlers(record)
+  File "/usr/lib/python3.8/logging/__init__.py", line 1649, in callHandlers
+    hdlr.handle(record)
+  File "/usr/lib/python3.8/logging/__init__.py", line 950, in handle
+    self.emit(record)
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/ops/log.py", line 34, in emit
+    self.model_backend.juju_log(record.levelname, self.format(record))
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/ops/model.py", line 1494, in juju_log
+    self._run('juju-log', '--log-level', level, "--", message)
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/ops/model.py", line 1284, in _run
+    result = run(args, **kwargs)
+  File "/usr/lib/python3.8/subprocess.py", line 489, in run
+    with Popen(*popenargs, **kwargs) as process:
+  File "/usr/lib/python3.8/subprocess.py", line 854, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.8/subprocess.py", line 1702, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+OSError: [Errno 7] Argument list too long: '/var/lib/juju/tools/unit-cert-manager-0/juju-log'
+unit-cert-manager-0: 15:27:30 ERROR juju.worker.uniter.operation hook "install" (via hook dispatching script: dispatch) failed: exit status 1
+unit-cert-manager-0: 15:27:53 ERROR unit.cert-manager/0.juju-log Uncaught exception while in charm code:
+Traceback (most recent call last):
+  File "./src/charm.py", line 113, in <module>
+    main(CertManagerCharm)
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/ops/main.py", line 404, in main
+    framework.reemit()
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/ops/framework.py", line 732, in reemit
+    self._reemit()
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/ops/framework.py", line 767, in _reemit
+    custom_handler(event)
+  File "./src/charm.py", line 44, in _on_install
+    create_from_yaml(k8s_client, crd_file, namespace=self.model.name)
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/kubernetes/utils/create_from_yaml.py", line 69, in create_from_yaml
+    created = create_from_dict(k8s_client, yml_document, verbose,
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/kubernetes/utils/create_from_yaml.py", line 129, in create_from_dict
+    created = create_from_yaml_single_item(
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/kubernetes/utils/create_from_yaml.py", line 171, in create_from_yaml_single_item
+    resp = getattr(k8s_api, "create_{0}".format(kind))(
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/kubernetes/client/api/apiextensions_v1_api.py", line 65, in create_custom_resource_definition
+    return self.create_custom_resource_definition_with_http_info(body, **kwargs)  # noqa: E501
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/kubernetes/client/api/apiextensions_v1_api.py", line 152, in create_custom_resource_definition_with_http_info
+    return self.api_client.call_api(
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/kubernetes/client/api_client.py", line 348, in call_api
+    return self.__call_api(resource_path, method,
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/kubernetes/client/api_client.py", line 180, in __call_api
+    response_data = self.request(
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/kubernetes/client/api_client.py", line 391, in request
+    return self.rest_client.POST(url,
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/kubernetes/client/rest.py", line 274, in POST
+    return self.request("POST", url,
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/kubernetes/client/rest.py", line 230, in request
+    logger.debug("response body: %s", r.data)
+  File "/usr/lib/python3.8/logging/__init__.py", line 1422, in debug
+    self._log(DEBUG, msg, args, **kwargs)
+  File "/usr/lib/python3.8/logging/__init__.py", line 1577, in _log
+    self.handle(record)
+  File "/usr/lib/python3.8/logging/__init__.py", line 1587, in handle
+    self.callHandlers(record)
+  File "/usr/lib/python3.8/logging/__init__.py", line 1649, in callHandlers
+    hdlr.handle(record)
+  File "/usr/lib/python3.8/logging/__init__.py", line 950, in handle
+    self.emit(record)
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/ops/log.py", line 34, in emit
+    self.model_backend.juju_log(record.levelname, self.format(record))
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/ops/model.py", line 1494, in juju_log
+    self._run('juju-log', '--log-level', level, "--", message)
+  File "/var/lib/juju/agents/unit-cert-manager-0/charm/venv/ops/model.py", line 1284, in _run
+    result = run(args, **kwargs)
+  File "/usr/lib/python3.8/subprocess.py", line 489, in run
+    with Popen(*popenargs, **kwargs) as process:
+  File "/usr/lib/python3.8/subprocess.py", line 854, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.8/subprocess.py", line 1702, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+OSError: [Errno 7] Argument list too long: '/var/lib/juju/tools/unit-cert-manager-0/juju-log'
+

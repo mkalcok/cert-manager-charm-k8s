@@ -1,0 +1,47 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ name }}
+  namespace: {{ namespace }}
+spec:
+  # Secret names are always required.
+  secretName: {{ name }}-tls
+  duration: {{ duration }}
+  renewBefore: {{ renew_before }}
+  subject:
+    organizations:
+    - {{ org }}
+  # The use of the common name field has been deprecated since 2000 and is
+  # discouraged from being used.
+  commonName: {{ common_name }}
+  isCA: false
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: {{ key_size }}
+  usages:
+    - server auth
+    - client auth
+  # At least one of a DNS Name, URI, or IP address is required.
+  dnsNames:
+  - {{ common_name }}
+{%- for foo in dns_names -%}
+  - {{ foo }}
+{% endfor %}
+  uris:
+  - spiffe://cluster.local/ns/sandbox/sa/example
+{%- if ip_addresses -%}
+    ipAddresses:
+{%- for address in ip_addresses -%}
+    - {{ address }}
+{%- endfor -%}
+{%- endif %}
+  # Issuer references are always required.
+  issuerRef:
+    name: selfsigned-issuer
+    # We can reference ClusterIssuers by changing the kind here.
+    # The default value is Issuer (i.e. a locally namespaced Issuer)
+    kind: Issuer
+    # This is optional since cert-manager will default to this value however
+    # if you are using an external issuer, change this to that issuer group.
+    group: cert-manager.io

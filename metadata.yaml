@@ -1,0 +1,36 @@
+# Copyright 2021 Martin Kalcok
+# See LICENSE file for licensing details.
+name: cert-manager
+description: |
+  TEMPLATE-TODO: fill out the charm's description
+summary: |
+  TEMPLATE-TODO: fill out the charm's summary
+
+containers:
+  cert-manager:
+    resource: controller-image
+  cert-manager-webhook:
+    resource: webhook-image
+  cert-manager-cainjector:
+    resource: cainjector-image
+
+resources:
+  controller-image:
+    type: oci-image
+    description: OCI image of cert-manager controller container
+   # auto-fetch: true
+   # upstream-source: quay.io/jetstack/cert-manager-controller:v1.3.1
+  webhook-image:
+    type: oci-image
+    description: OCI image of cert-manager webhook container
+    #auto-fetch: true
+    #upstream-source: quay.io/jetstack/cert-manager-webhook:v1.3.1
+  cainjector-image:
+    type: oci-image
+    description: OCI image of cert-manager cainjector container
+    #auto-fetch: true
+    #upstream-source: quay.io/jetstack/cert-manager-cainjector:v1.3.1
+
+provides:
+  certificates:
+    interface: certificates
