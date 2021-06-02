@@ -58,9 +58,6 @@ class CertManagerCharm(CharmBase):
 
         self.certificates = CertificatesProvides(self)
 
-        self.framework.observe(self.on.certificates_requested,
-                               self.certificates._on_certificate_requested)
-
         resource_loader = FileSystemLoader(searchpath='./resources')
         self.resource_templates = Environment(loader=resource_loader)
 
@@ -101,10 +98,12 @@ class CertManagerCharm(CharmBase):
             self._stored.config['custom-ca'] = custom_ca
             self.configure_custom_ca(custom_ca)
 
-        if not self.is_ca_ready():
+        ca_ready = self.is_ca_ready()
+        if not ca_ready:
             self.unit.status = BlockedStatus("CA not configured.")
         else:
             self.unit.status = ActiveStatus()
+        self.certificates.update_ca_status(ca_ready)
 
     def is_ca_ready(self) -> bool:
         custom_ca = bool(json.loads(self.config.get('custom-ca').replace("'", '"')))
