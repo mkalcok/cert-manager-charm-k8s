@@ -14,14 +14,16 @@ develop a new k8s charm using the Operator Framework:
 
 import json
 import logging
+import tempfile
 
 from jinja2 import Environment, FileSystemLoader
 from kubernetes import client, config
 from kubernetes.utils import create_from_yaml
-from ops.charm import CharmBase
+from ops.charm import CharmBase, PebbleReadyEvent
 from ops.framework import StoredState
 from ops.main import main
 from ops.model import ActiveStatus, BlockedStatus
+import yaml
 
 from charms.mkalcok_certificates.v0.certificates import (
     CertificatesProvides,
@@ -37,7 +39,7 @@ logging.getLogger('kubernetes').setLevel(logging.INFO)
 class CertManagerCharm(CharmBase):
     """Charm the service."""
 
-    CRD_FILE = 'resources/cert-manager.crds.yaml'
+    CRD_FILE = 'cert-manager.yaml.j2'
     custom_resources = [ 
         "certificaterequests.cert-manager.io",
         "certificates.cert-manager.io",
@@ -55,6 +57,12 @@ class CertManagerCharm(CharmBase):
         self.framework.observe(self.on.install, self._on_install)
         self.framework.observe(self.on.stop, self._on_stop)
         self.framework.observe(self.on.config_changed, self._on_config_changed)
+        self.framework.observe(self.on.cert_manager_pebble_ready,
+                               self._on_cert_manager_pebble_ready)
+        self.framework.observe(self.on.cert_manager_webhook_pebble_ready,
+                               self._on_cert_manager_webhook_pebble_ready)
+        self.framework.observe(self.on.cert_manager_cainjector_pebble_ready,
+                               self._on_cert_manager_cainjector_pebble_ready)
 
         self.certificates = CertificatesProvides(self)
 
@@ -65,12 +73,110 @@ class CertManagerCharm(CharmBase):
         for key, value in self.config.items():
             if key not in self._stored.config:
                 self._stored.config[key] = value
-    
+
+    def _on_cert_manager_pebble_ready(self, event: PebbleReadyEvent):
+        logger.info('Configuring cert-manager container.')
+        layer= {
+            'summary': 'cert-manager controller layer',
+            'description': 'foo',
+            'services': {
+                'cert-manager': {
+                    'override': 'replace',
+                    'command': '/app/cmd/controller/controller --v=2 --cluster-resource-namespace={} --leader-election-namespace=kube-system'.format(self.model.name),
+                    'environment': {'POD_NAMESPACE': self.model.name},
+                    'startup': 'enabled',
+                }
+            }
+        }
+        container = event.workload
+        container.add_layer('cert-manager-controller', layer, combine=True)
+        container.autostart()
+
+    def _on_cert_manager_webhook_pebble_ready(self, event):
+        logger.info('Configuring cert-manager-webhook container.')
+        layer= {
+            'summary': 'cert-manager controller layer',
+            'description': 'foo',
+            'services': {
+                'cert-manager': {
+                    'override': 'replace',
+                    'command': '/app/cmd/webhook/webhook --v=2 --secure-port=10250 --dynamic-serving-ca-secret-namespace={0} --dynamic-serving-ca-secret-name=cert-manager-webhook-ca --dynamic-serving-dns-names=cert-manager-webhook,cert-manager-webhook.{0},cert-manager-webhook.{0}.svc'.format(self.model.name),
+                    'environment': {'POD_NAMESPACE': self.model.name},
+                    'startup': 'enabled',
+                }
+            }
+        }
+        container = event.workload
+        container.add_layer('cert-manager-webhook', layer, combine=True)
+        container.autostart()
+
+    def _on_cert_manager_cainjector_pebble_ready(self, event):
+        logger.info('Configuring cert-manager-cainjector container.')
+        layer= {
+            'summary': 'cert-manager controller layer',
+            'description': 'foo',
+            'services': {
+                'cert-manager': {
+                    'override': 'replace',
+                    'command': '/app/cmd/cainjector/cainjector --v=2 --leader-election-namespace=kube-system',
+                    'environment': {'POD_NAMESPACE': self.model.name},
+                    'startup': 'enabled',
+                }
+            }
+        }
+        container = event.workload
+        container.add_layer('cert-manager-cainjector', layer, combine=True)
+        container.autostart()
+        pass
+
     def _on_install(self, _):
         config.load_incluster_config()
         with client.ApiClient() as k8s_client:
-            create_from_yaml(k8s_client, self.CRD_FILE, namespace=self.model.name)
+            with tempfile.NamedTemporaryFile(mode='w') as temp_file:
+                template = self.resource_templates.get_template(self.CRD_FILE)
+                resources = template.render(namespace=self.model.name)
+                temp_file.write(resources)
+                temp_file.seek(0)
+                create_from_yaml(k8s_client, temp_file.name)
+            self.ensure_service_account_exists(k8s_client)
+            self.ensure_service_exists(k8s_client)
+
         self.unit.status = ActiveStatus()
+
+    def ensure_service_account_exists(self, k8s_client):
+        api = client.CoreV1Api(k8s_client)
+        cert_manager_present = False
+        for service_account in api.list_namespaced_service_account(self.model.name).items:
+            if service_account.metadata.name == 'cert-manager':
+                cert_manager_present = True
+                break
+        template = self.resource_templates.get_template('cert_manager_service_account.yaml.j2')
+        data = template.render(namespace=self.model.name)
+        body = yaml.safe_load(data)
+        if cert_manager_present:
+            logger.debug('Updating service account cert-manager')
+            api.patch_namespaced_service_account('cert-manager', self.model.name, body)
+        else:
+            logger.debug('Creating service account cert-manager')
+            api.create_namespaced_service_account(self.model.name, body)
+
+    def ensure_service_exists(self, k8s_client):
+        api = client.CoreV1Api(k8s_client)
+        cert_manager_service_present = False
+        for service in api.list_namespaced_service(self.model.name).items:
+            if service.metadata.name == 'cert-manager':
+                cert_manager_service_present = True
+                break
+
+        template = self.resource_templates.get_template('cert_manager_service.yaml.j2')
+        data = template.render(namespace=self.model.name)
+        body = yaml.safe_load(data)
+        if cert_manager_service_present:
+            logger.debug('Updating cert-manager service')
+            api.patch_namespaced_service('cert-manager', self.model.name, body)
+        else:
+            logger.debug('Creating cert-manager service')
+            api.create_namespaced_service(self.model.name, body)
 
     def _on_stop(self, _):
         logger.error("Stopping charm")
