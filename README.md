@@ -2,11 +2,24 @@
 
 ## Description
 
-TODO: Describe your charm in a few paragraphs of Markdown
+cert-manager is, as name suggests, a kubernetes application that acts as a
+certificate authority and provides a API which other k8s applications can use to
+create and renew certificates. cert-manager can be configured to sign
+certificates with:
+* self-signed CA certificate
+* explicitly configured CA certificate
+* CA certificate issued  by ACME service (like letsencrypt)
 
 ## Usage
 
-TODO: Provide high-level usage, such as required config or relations
+this charm is not yet ready for usage.
+
+## TODO
+
+* Finish the installation process. Currently the application is not 100%
+functional after charm deployment.
+* Enrich the interface for creation of certificates, currently it only
+takes the `common_name` as parameter when creating new certificate.
 
 
 ## Developing
